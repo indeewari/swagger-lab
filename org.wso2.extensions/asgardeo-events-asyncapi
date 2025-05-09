@@ -1,0 +1,665 @@
+asyncapi: 3.0.0
+info:
+  title: Asgardeo Events API
+  version: 2.0.0
+  description: >
+    Webhook-based event delivery for Asgardeo. Supports multiple event types from login,
+    registration, credential updates, profile updates, and session revocations.
+servers:
+  default:
+    protocol: https
+    host: websubhub.asgardeo.io/hub
+    description: Subscriber webhook endpoint
+channels:
+  login:
+    address: '{organization}.schemas.identity.wso2.org/events/login'
+    parameters:
+      organization:
+        description: The organization identifier.
+    messages:
+      loginSuccess:
+        $ref: '#/components/messages/loginSuccess'
+      loginFailed:
+        $ref: '#/components/messages/loginFailed'
+  registration:
+    address: '{organization}.schemas.identity.wso2.org/events/registration'
+    parameters:
+      organization:
+        description: The organization identifier.
+    messages:
+      registrationSuccess:
+        $ref: '#/components/messages/registrationSuccess'
+      registrationFailed:
+        $ref: '#/components/messages/registrationFailed'
+      registrationInvite:
+         $ref: '#/components/messages/registrationInvite'
+  credential:
+    address: '{organization}.schemas.identity.wso2.org/events/t/{organization}/credential'
+    parameters:
+      organization:
+        description: The organization identifier.
+    messages:
+      credentialUpdated:
+        $ref: '#/components/messages/credentialUpdated'
+      credentialUpdateRequested:
+        $ref: '#/components/messages/credentialUpdateRequested'
+
+operations:
+  loginSuccess:
+    action: send
+    channel:
+      $ref: '#/channels/login'
+    messages:
+      - $ref: '#/channels/login/messages/loginSuccess'
+  loginFailed:
+    action: send
+    channel:
+      $ref: '#/channels/login'
+    messages:
+      - $ref: '#/channels/login/messages/loginFailed'
+  registrationSuccess:
+    action: send
+    channel:
+      $ref: '#/channels/registration'
+    messages:
+      - $ref: '#/channels/registration/messages/registrationSuccess'
+  registrationFailed:
+    action: send
+    channel:
+      $ref: '#/channels/registration'
+    messages:
+      - $ref: '#/channels/registration/messages/registrationFailed'
+  registrationInvite:
+    action: send
+    channel:
+      $ref: '#/channels/registration'
+    messages:
+      - $ref: '#/channels/registration/messages/registrationInvite'
+  credentialUpdated:
+    action: send
+    channel:
+      $ref: '#/channels/credential'
+    messages:
+      - $ref: '#/channels/credential/messages/credentialUpdated'
+  credentialUpdateRequested:
+    action: send
+    channel:
+      $ref: '#/channels/credential'
+    messages:
+      - $ref: '#/channels/credential/messages/credentialUpdateRequested'
+components:
+  messages:
+    loginSuccess:
+      name: loginSuccess
+      title: User Login Success Event
+      summary: Triggered when a user logs in successfully.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/LoginSuccessPayload'
+    loginFailed:
+      name: loginFailed
+      title: User Login Failed Event
+      summary: Triggered when a user's login attempt fails.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/LoginFailedPayload'
+    registrationSuccess:
+      name: registrationSuccess
+      title: User Registration Success Event
+      summary: Triggered when a user successfully registers.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/RegistrationSuccessPayload'
+    registrationFailed:
+      name: registrationFailed
+      title: User Registration Failed Event
+      summary: Triggered when a user registration fails.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/RegistrationFailedPayload'
+    registrationInvite:
+      name: registrationInvite
+      title: User Registration Invite Event
+      summary: Triggered when a user registred successfully via an invite.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/RegistrationInvitePayload'
+    credentialUpdated:
+      name: credentialUpdateRequested
+      title: Credential Update Event
+      summary: Triggered when a credential update like user update password, add or remove passkeys, authentictors or backup codes in MyAccount.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/CredentialUpdatedPayload'
+    credentialUpdateRequested:
+      name: credentialUpdateRequested
+      title: Forced credential Update Event.
+      summary: Triggered when forced credential update.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/CredentialUpdateRequestedPayload'
+    
+  schemas:
+    LoginSuccessPayload:
+      type: object
+      required: [iss, jti, iat, rci, event]
+      properties:
+        iss:
+          type: string
+          format: uri
+          description: Issuer of the event.
+        jti:
+          type: string
+          format: uuid
+          description: Unique event identifier.
+        iat:
+          type: integer
+          description: Issued-at timestamp in milliseconds.
+        rci:
+          type: string
+          format: uuid
+          description: Request correlation identifier.
+        event:
+          type: object
+          required:
+            - schemas.identity.wso2.org/events/logins/event-type/loginSuccess
+          properties:
+            schemas.identity.wso2.org/events/logins/event-type/loginSuccess:
+              type: object
+              required: [user, tenant, userStore, application]
+              properties:
+                user:
+                  type: object
+                  required: [id, claims, ref]
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    claims:
+                      type: array
+                      items:
+                        type: object
+                        required: [uri, value]
+                        properties:
+                          uri:
+                            type: string
+                          value:
+                            type: string
+                    ref:
+                      type: string
+                      format: uri
+                tenant:
+                  type: object
+                  required: [id, name]
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                userStore:
+                  type: object
+                  required: [id, name]
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                application:
+                  type: object
+                  required: [id, name]
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                authenticationMethods:
+                  type: array
+                  items:
+                    type: string
+    LoginFailedPayload:
+      type: object
+      required: [iss, jti, iat, rci, events]
+      properties:
+        iss:
+          type: string
+          format: uri
+          description: Issuer of the event.
+        jti:
+          type: string
+          format: uuid
+          description: Unique event identifier.
+        iat:
+          type: integer
+          description: Issued-at timestamp in milliseconds.
+        rci:
+          type: string
+          format: uuid
+          description: Request correlation ID.
+        events:
+          type: object
+          required:
+            - https://schemas.identity.wso2.org/events/logins/event-type/loginFailed
+          properties:
+            https://schemas.identity.wso2.org/events/logins/event-type/loginFailed:
+              type: object
+              required: [user, tenant, application, reason]
+              properties:
+                user:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    ref:
+                      type: string
+                      format: uri
+                tenant:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                application:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    name:
+                      type: string
+                reason:
+                  type: object
+                  required: [id, failedStep]
+                  properties:
+                    id:
+                      type: string
+                    failedStep:
+                      type: object
+                      required: [step, idp, authenticator]
+                      properties:
+                        step:
+                          type: integer
+                        idp:
+                          type: string
+                        authenticator:
+                          type: string
+    RegistrationSuccessPayload:
+      type: object
+      properties:
+        iss:
+          type: string
+          description: Issuer
+        jti:
+          type: string
+          format: uuid
+          description: JWT ID
+        iat:
+          type: integer
+          format: int64
+          description: Issued at (epoch ms)
+        aud:
+          type: string
+          description: Audience
+        txn:
+          type: string
+          description: Transaction ID
+        toe:
+          type: string
+          description: Time of event
+        events:
+          type: object
+          properties:
+            https://schemas.identity.wso2.org/events/registration/event-type/registrationSuccess:
+              $ref: '#/components/schemas/RegistrationSuccessEvent'
+    RegistrationFailedPayload:
+      type: object
+      required: [iss, jti, iat, events]
+      properties:
+        iss:
+          type: string
+          format: uri
+          description: Issuer of the event.
+        jti:
+          type: string
+          format: uuid
+          description: Unique event identifier.
+        iat:
+          type: integer
+          description: Issued-at timestamp in milliseconds.
+        aud:
+          type: string
+          description: Audience (if applicable).
+        txn:
+          type: string
+          description: Transaction ID (if applicable).
+        toe:
+          type: integer
+          description: Timestamp of event occurrence.
+        events:
+          type: object
+          required:
+            - urn:ietf:params:registrations:registrationFailed
+          properties:
+            "https://schemas.identity.wso2.org/events/registration/event-type/registrationFailed":
+              type: object
+              required: [initiatorType, action, user, organization, userStore, application, reason]
+              properties:
+                initiatorType:
+                  type: string
+                  description: Type of the initiator (e.g., user, admin).
+                action:
+                  type: string
+                  description: The attempted action (e.g., register).
+                user:
+                  type: object
+                  required: [id, identifiers, ref]
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    identifiers:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          uri:
+                            type: string
+                          value:
+                            type: string
+                    ref:
+                      type: string
+                      format: uri
+                organization:
+                  type: object
+                  required: [organizationId, organizationName]
+                  properties:
+                    organizationId:
+                      type: string
+                    organizationName:
+                      type: string
+                userStore:
+                  type: object
+                  required: [userStoreId, userStoreName]
+                  properties:
+                    userStoreId:
+                      type: string
+                    userStoreName:
+                      type: string
+                application:
+                  type: object
+                  required: [applicationId, applicationName]
+                  properties:
+                    applicationId:
+                      type: string
+                      format: uuid
+                    applicationName:
+                      type: string
+                reason:
+                  type: object
+                  required: [id, message, i18nKey]
+                  properties:
+                    id:
+                      type: string
+                    message:
+                      type: string
+                    i18nKey:
+                      type: string
+    RegistrationInvitePayload:
+      type: object
+      required: [iss, jti, iat, events]
+      properties:
+        iss:
+          type: string
+          format: uri
+          description: Issuer of the event.
+        jti:
+          type: string
+          format: uuid
+          description: Unique event identifier.
+        iat:
+          type: integer
+          description: Issued-at timestamp in milliseconds.
+        aud:
+          type: string
+          description: Audience (if applicable).
+        txn:
+          type: string
+          description: Transaction ID (if applicable).
+        toe:
+          type: integer
+          description: Timestamp of event occurrence.
+        events:
+          type: object
+          required:
+            - urn:ietf:params:registrations:registrationSuccess
+          properties:
+            "https://schemas.identity.wso2.org/events/registration/event-type/registrationInvite":
+              type: object
+              required: [initiatorType, action, user, organization, userStore, application]
+              properties:
+                initiatorType:
+                  type: string
+                  enum: [admin]
+                  description: Type of the initiator (e.g., admin).
+                action:
+                  type: string
+                  enum: [invite]
+                  description: The action performed.
+                user:
+                  type: object
+                  required: [id, claims, roles, groups, ref]
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    claims:
+                      type: array
+                      items:
+                        type: object
+                        required: [uri, value]
+                        properties:
+                          uri:
+                            type: string
+                          value:
+                            type: string
+                    roles:
+                      type: array
+                      items:
+                        type: string
+                    groups:
+                      type: array
+                      items:
+                        type: string
+                    ref:
+                      type: string
+                      format: uri
+                organization:
+                  type: object
+                  required: [id, name]
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                userStore:
+                  type: object
+                  required: [id, name]
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                application:
+                  type: object
+                  required: [id, name]
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                registrationMethods:
+                  type: array
+                  items:
+                    type: string
+                credentialsEnrolled:
+                  type: array
+                  items:
+                    type: string
+    CredentialUpdatedPayload:
+      type: object
+      properties:
+        iss:
+          type: string
+          description: Issuer
+        jti:
+          type: string
+          format: uuid
+          description: JWT ID
+        iat:
+          type: integer
+          format: int64
+          description: Issued at (epoch ms)
+        aud:
+          type: string
+          description: Audience
+        txn:
+          type: string
+          description: Transaction ID
+        toe:
+          type: string
+          description: Time of event
+        events:
+          type: object
+          properties:
+            "https://schemas.identity.wso2.org/events/credential/event-type/credentialUpdated":
+              $ref: '#/components/schemas/CredentialUpdatedEvent'
+    CredentialUpdateRequestedPayload:
+      type: object
+      properties:
+        iss:
+          type: string
+          description: Issuer
+        jti:
+          type: string
+          format: uuid
+          description: JWT ID
+        iat:
+          type: integer
+          format: int64
+          description: Issued at (epoch ms)
+        aud:
+          type: string
+          description: Audience
+        txn:
+          type: string
+          description: Transaction ID
+        toe:
+          type: string
+          description: Time of event
+        events:
+          type: object
+          properties:
+            urn:ietf:params:user-operations:credentialUpdateRequired:
+              $ref: '#/components/schemas/CredentialUpdateRequestedEvent'
+
+    CredentialUpdateRequestedEvent:
+      type: object
+      properties:
+        initiatorType:
+          type: string
+          enum: [admin, user]
+        credentialType:
+          type: string
+          enum: [password, totp, fido, sms, email]
+        user:
+          $ref: '#/components/schemas/User'
+        organization:
+          $ref: '#/components/schemas/Organization'
+        userStore:
+          $ref: '#/components/schemas/UserStore'
+
+    CredentialUpdatedEvent:
+      type: object
+      properties:
+        initiatorType:
+          type: string
+          enum: [admin, user]
+        action:
+          type: string
+          enum: [update]
+        credentialType:
+          type: string
+          enum: [password, totp, fido, sms, email]
+        user:
+          $ref: '#/components/schemas/User'
+        organization:
+          $ref: '#/components/schemas/Organization'
+        userStore:
+          $ref: '#/components/schemas/UserStore'
+    
+    RegistrationSuccessEvent:
+      type: object
+      properties:
+        initiatorType:
+          type: string
+          enum: [admin, user]
+        action:
+          type: string
+          enum: [register, invite]
+        user:
+          $ref: '#/components/schemas/User'
+        organization:
+          $ref: '#/components/schemas/Organization'
+        userStore:
+          $ref: '#/components/schemas/UserStore'
+        registrationMethods:
+          type: array
+          items:
+            type: string
+        credentialsEnrolled:
+          type: array
+          items:
+            type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        claims:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserClaim'
+        roles:
+          type: array
+          items:
+            type: string
+        groups:
+          type: array
+          items:
+            type: string
+        ref:
+          type: string
+          format: uri
+    UserClaim:
+      type: object
+      properties:
+        uri:
+          type: string
+        value:
+          type: string
+    Organization:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    UserStore:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
