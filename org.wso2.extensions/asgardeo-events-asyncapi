@@ -12,9 +12,11 @@ servers:
     description: Subscriber webhook endpoint
 channels:
   login:
-    address: '{organization}.schemas.identity.wso2.org/events/login'
+    address: '{organization}.{version}.schemas.identity.wso2.org/events/login'
     parameters:
       organization:
+        description: The organization identifier.
+      version:
         description: The organization identifier.
     messages:
       loginSuccess:
@@ -22,9 +24,11 @@ channels:
       loginFailed:
         $ref: '#/components/messages/loginFailed'
   registration:
-    address: '{organization}.schemas.identity.wso2.org/events/registration'
+    address: '{organization}.{version}.schemas.identity.wso2.org/events/registration'
     parameters:
       organization:
+        description: The organization identifier.
+      version:
         description: The organization identifier.
     messages:
       registrationSuccess:
@@ -34,9 +38,11 @@ channels:
       registrationInvite:
          $ref: '#/components/messages/registrationInvite'
   credential:
-    address: '{organization}.schemas.identity.wso2.org/events/t/{organization}/credential'
+    address: '{organization}.{version}.schemas.identity.wso2.org/events/t/{organization}/credential'
     parameters:
       organization:
+        description: The organization identifier.
+      version:
         description: The organization identifier.
     messages:
       credentialUpdated:
