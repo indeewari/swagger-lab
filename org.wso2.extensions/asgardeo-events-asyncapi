@@ -49,7 +49,16 @@ channels:
         $ref: '#/components/messages/credentialUpdated'
       credentialUpdateRequested:
         $ref: '#/components/messages/credentialUpdateRequested'
-
+  user:
+    address: '{organization}.{version}.schemas.identity.wso2.org/events/t/{organization}/user'
+    parameters:
+      organization:
+        description: The organization identifier.
+      version:
+        description: The organization identifier.
+    messages:
+      userProfileUpdated:
+        $ref: '#/components/messages/userProfileUpdated'
 operations:
   loginSuccess:
     action: send
@@ -93,6 +102,12 @@ operations:
       $ref: '#/channels/credential'
     messages:
       - $ref: '#/channels/credential/messages/credentialUpdateRequested'
+  userProfileUpdated:
+    action: send
+    channel:
+      $ref: '#/channels/user'
+      messages:
+      - $ref: '#/channels/user/messages/userProfileUpdated'
 components:
   messages:
     loginSuccess:
@@ -144,7 +159,13 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/CredentialUpdateRequestedPayload'
-    
+    userProfileUpdated:
+      name: userProfileUpdated
+      title: User profile update event.
+      summary: Triggered when user profile is updated.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ProfileUpdateRequestPayload'
   schemas:
     LoginSuccessPayload:
       type: object
@@ -244,9 +265,9 @@ components:
         events:
           type: object
           required:
-            - https://schemas.identity.wso2.org/events/logins/event-type/loginFailed
+            - schemas.identity.wso2.org/events/logins/event-type/loginFailed
           properties:
-            https://schemas.identity.wso2.org/events/logins/event-type/loginFailed:
+            schemas.identity.wso2.org/events/logins/event-type/loginFailed:
               type: object
               required: [user, tenant, application, reason]
               properties:
@@ -316,7 +337,7 @@ components:
         events:
           type: object
           properties:
-            https://schemas.identity.wso2.org/events/registration/event-type/registrationSuccess:
+            schemas.identity.wso2.org/events/registration/event-type/registrationSuccess:
               $ref: '#/components/schemas/RegistrationSuccessEvent'
     RegistrationFailedPayload:
       type: object
@@ -344,10 +365,8 @@ components:
           description: Timestamp of event occurrence.
         events:
           type: object
-          required:
-            - urn:ietf:params:registrations:registrationFailed
           properties:
-            "https://schemas.identity.wso2.org/events/registration/event-type/registrationFailed":
+            "schemas.identity.wso2.org/events/registration/event-type/registrationFailed":
               type: object
               required: [initiatorType, action, user, organization, userStore, application, reason]
               properties:
@@ -437,10 +456,8 @@ components:
           description: Timestamp of event occurrence.
         events:
           type: object
-          required:
-            - urn:ietf:params:registrations:registrationSuccess
           properties:
-            "https://schemas.identity.wso2.org/events/registration/event-type/registrationInvite":
+            "schemas.identity.wso2.org/events/registration/event-type/registrationInvite":
               type: object
               required: [initiatorType, action, user, organization, userStore, application]
               properties:
@@ -538,7 +555,7 @@ components:
         events:
           type: object
           properties:
-            "https://schemas.identity.wso2.org/events/credential/event-type/credentialUpdated":
+            "schemas.identity.wso2.org/events/credential/event-type/credentialUpdated":
               $ref: '#/components/schemas/CredentialUpdatedEvent'
     CredentialUpdateRequestedPayload:
       type: object
@@ -566,9 +583,50 @@ components:
         events:
           type: object
           properties:
-            urn:ietf:params:user-operations:credentialUpdateRequired:
+            'schemas.identity.wso2.org/events/credential/event-type/credentialUpdateRequested':
               $ref: '#/components/schemas/CredentialUpdateRequestedEvent'
-
+    ProfileUpdateRequestPayload:
+      type: object
+      properties:
+        iss:
+          type: string
+          example: https://api.asg.io/t/indeewari
+        jti:
+          type: string
+          format: uuid
+          example: ab619df6-9d71-4295-89d1-dd9524ba53d3
+        iat:
+          type: integer
+          format: int64
+          example: 1748104718864
+        aud:
+          type: string
+          example: aud
+        txn:
+          type: string
+          example: txn
+        rci:
+          type: string
+          format: uuid
+          example: 39c842f4-8ce6-4a01-a26b-724eba2223a8
+        events:
+          type: object
+          properties:
+            schemas.identity.wso2.org/events/user/event-type/userProfileUpdated:
+              $ref: '#/components/schemas/ProfileUpdateRequestdEvent'
+    
+    ProfileUpdateRequestdEvent:
+        type: object
+        properties:
+          initiatorType:
+            type: string
+            enum: [admin, user]
+          user:
+            $ref: '#/components/schemas/ProfileUpdatedUser'
+          organization:
+            $ref: '#/components/schemas/Organization'
+          userStore:
+            $ref: '#/components/schemas/UserStore'
     CredentialUpdateRequestedEvent:
       type: object
       properties:
@@ -648,6 +706,8 @@ components:
         ref:
           type: string
           format: uri
+          examples:
+            - 'https://api.asg.io/t/indeewari/scim2/4c9af344-3c8e-44c4-895c-831cf71b6b21'
     UserClaim:
       type: object
       properties:
@@ -669,3 +729,26 @@ components:
           type: string
         name:
           type: string
+    ProfileUpdatedUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        addedClaims:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserClaim'
+        updatedClaims:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserClaim'
+        removedClaims:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserClaim'
+        ref:
+          type: string
+          format: uri
+          examples:
+            - 'https://api.asg.io/t/indeewari/scim2/4c9af344-3c8e-44c4-895c-831cf71b6b21'
