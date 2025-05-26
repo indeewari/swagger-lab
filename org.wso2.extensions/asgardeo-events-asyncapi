@@ -14,7 +14,7 @@ channels:
   login:
     address: '{organization}.{version}.schemas.identity.wso2.org/events/login'
     parameters:
-      organization:
+      tenant:
         description: The organization identifier.
       version:
         description: The organization identifier.
@@ -26,7 +26,7 @@ channels:
   registration:
     address: '{organization}.{version}.schemas.identity.wso2.org/events/registration'
     parameters:
-      organization:
+      tenant:
         description: The organization identifier.
       version:
         description: The organization identifier.
@@ -38,9 +38,9 @@ channels:
       registrationInvite:
          $ref: '#/components/messages/registrationInvite'
   credential:
-    address: '{organization}.{version}.schemas.identity.wso2.org/events/t/{organization}/credential'
+    address: '{organization}.{version}.schemas.identity.wso2.org/events/credential'
     parameters:
-      organization:
+      tenant:
         description: The organization identifier.
       version:
         description: The organization identifier.
@@ -50,9 +50,9 @@ channels:
       credentialUpdateRequested:
         $ref: '#/components/messages/credentialUpdateRequested'
   user:
-    address: '{organization}.{version}.schemas.identity.wso2.org/events/t/{organization}/user'
+    address: '{organization}.{version}.schemas.identity.wso2.org/events/user'
     parameters:
-      organization:
+      tenant:
         description: The organization identifier.
       version:
         description: The organization identifier.
@@ -182,6 +182,8 @@ components:
         iat:
           type: integer
           description: Issued-at timestamp in milliseconds.
+          example:
+            1748104718
         rci:
           type: string
           format: uuid
@@ -189,9 +191,9 @@ components:
         event:
           type: object
           required:
-            - schemas.identity.wso2.org/events/logins/event-type/loginSuccess
+            - https://schemas.identity.wso2.org/events/logins/event-type/loginSuccess
           properties:
-            schemas.identity.wso2.org/events/logins/event-type/loginSuccess:
+            https://schemas.identity.wso2.org/events/logins/event-type/loginSuccess:
               type: object
               required: [user, tenant, userStore, application]
               properties:
@@ -258,6 +260,8 @@ components:
         iat:
           type: integer
           description: Issued-at timestamp in milliseconds.
+          example:
+            1748104718
         rci:
           type: string
           format: uuid
@@ -265,9 +269,9 @@ components:
         events:
           type: object
           required:
-            - schemas.identity.wso2.org/events/logins/event-type/loginFailed
+            - https://schemas.identity.wso2.org/events/logins/event-type/loginFailed
           properties:
-            schemas.identity.wso2.org/events/logins/event-type/loginFailed:
+            https://schemas.identity.wso2.org/events/logins/event-type/loginFailed:
               type: object
               required: [user, tenant, application, reason]
               properties:
@@ -325,19 +329,12 @@ components:
           type: integer
           format: int64
           description: Issued at (epoch ms)
-        aud:
-          type: string
-          description: Audience
-        txn:
-          type: string
-          description: Transaction ID
-        toe:
-          type: string
-          description: Time of event
+          example:
+            1748104718
         events:
           type: object
           properties:
-            schemas.identity.wso2.org/events/registration/event-type/registrationSuccess:
+            https://schemas.identity.wso2.org/events/registration/event-type/registrationSuccess:
               $ref: '#/components/schemas/RegistrationSuccessEvent'
     RegistrationFailedPayload:
       type: object
@@ -354,28 +351,21 @@ components:
         iat:
           type: integer
           description: Issued-at timestamp in milliseconds.
-        aud:
-          type: string
-          description: Audience (if applicable).
-        txn:
-          type: string
-          description: Transaction ID (if applicable).
-        toe:
-          type: integer
-          description: Timestamp of event occurrence.
+          example:
+            1748104718
         events:
           type: object
           properties:
-            "schemas.identity.wso2.org/events/registration/event-type/registrationFailed":
+            "https://schemas.identity.wso2.org/events/registration/event-type/registrationFailed":
               type: object
-              required: [initiatorType, action, user, organization, userStore, application, reason]
+              required: [initiatorType, action, user, tenant, userStore, application, reason]
               properties:
                 initiatorType:
                   type: string
-                  description: Type of the initiator (e.g., user, admin).
+                  description: Type of the initiator (e.g., USER, ADMIN).
                 action:
                   type: string
-                  description: The attempted action (e.g., register).
+                  description: The attempted action (e.g., REGISTER).
                 user:
                   type: object
                   required: [id, identifiers, ref]
@@ -395,13 +385,13 @@ components:
                     ref:
                       type: string
                       format: uri
-                organization:
+                tenant:
                   type: object
-                  required: [organizationId, organizationName]
+                  required: [tenanatId, tenantName]
                   properties:
-                    organizationId:
+                    tenanatId:
                       type: string
-                    organizationName:
+                    tenantName:
                       type: string
                 userStore:
                   type: object
@@ -445,29 +435,22 @@ components:
         iat:
           type: integer
           description: Issued-at timestamp in milliseconds.
-        aud:
-          type: string
-          description: Audience (if applicable).
-        txn:
-          type: string
-          description: Transaction ID (if applicable).
-        toe:
-          type: integer
-          description: Timestamp of event occurrence.
+          example:
+            1748104718
         events:
           type: object
           properties:
-            "schemas.identity.wso2.org/events/registration/event-type/registrationInvite":
+            "https://schemas.identity.wso2.org/events/registration/event-type/registrationInvite":
               type: object
-              required: [initiatorType, action, user, organization, userStore, application]
+              required: [initiatorType, action, user, tenant, userStore, application]
               properties:
                 initiatorType:
                   type: string
-                  enum: [admin]
-                  description: Type of the initiator (e.g., admin).
+                  enum: [ADMIN]
+                  description: Type of the initiator (e.g., ADMIN).
                 action:
                   type: string
-                  enum: [invite]
+                  enum: [INVITE]
                   description: The action performed.
                 user:
                   type: object
@@ -497,7 +480,7 @@ components:
                     ref:
                       type: string
                       format: uri
-                organization:
+                tenant:
                   type: object
                   required: [id, name]
                   properties:
@@ -543,19 +526,12 @@ components:
           type: integer
           format: int64
           description: Issued at (epoch ms)
-        aud:
-          type: string
-          description: Audience
-        txn:
-          type: string
-          description: Transaction ID
-        toe:
-          type: string
-          description: Time of event
+          example:
+            1748104718
         events:
           type: object
           properties:
-            "schemas.identity.wso2.org/events/credential/event-type/credentialUpdated":
+            "https://schemas.identity.wso2.org/events/credential/event-type/credentialUpdated":
               $ref: '#/components/schemas/CredentialUpdatedEvent'
     CredentialUpdateRequestedPayload:
       type: object
@@ -571,19 +547,12 @@ components:
           type: integer
           format: int64
           description: Issued at (epoch ms)
-        aud:
-          type: string
-          description: Audience
-        txn:
-          type: string
-          description: Transaction ID
-        toe:
-          type: string
-          description: Time of event
+          example:
+            1748104718
         events:
           type: object
           properties:
-            'schemas.identity.wso2.org/events/credential/event-type/credentialUpdateRequested':
+            'https://schemas.identity.wso2.org/events/credential/event-type/credentialUpdateRequested':
               $ref: '#/components/schemas/CredentialUpdateRequestedEvent'
     ProfileUpdateRequestPayload:
       type: object
@@ -599,12 +568,6 @@ components:
           type: integer
           format: int64
           example: 1748104718864
-        aud:
-          type: string
-          example: aud
-        txn:
-          type: string
-          example: txn
         rci:
           type: string
           format: uuid
@@ -612,7 +575,7 @@ components:
         events:
           type: object
           properties:
-            schemas.identity.wso2.org/events/user/event-type/userProfileUpdated:
+            https://schemas.identity.wso2.org/events/user/event-type/userProfileUpdated:
               $ref: '#/components/schemas/ProfileUpdateRequestdEvent'
     
     ProfileUpdateRequestdEvent:
@@ -620,11 +583,11 @@ components:
         properties:
           initiatorType:
             type: string
-            enum: [admin, user]
+            enum: [ADMIN, USER]
           user:
             $ref: '#/components/schemas/ProfileUpdatedUser'
-          organization:
-            $ref: '#/components/schemas/Organization'
+          tenant:
+            $ref: '#/components/schemas/Tenant'
           userStore:
             $ref: '#/components/schemas/UserStore'
     CredentialUpdateRequestedEvent:
@@ -632,14 +595,14 @@ components:
       properties:
         initiatorType:
           type: string
-          enum: [admin, user]
+          enum: [ADMIN, USER]
         credentialType:
           type: string
           enum: [password, totp, fido, sms, email]
         user:
           $ref: '#/components/schemas/User'
-        organization:
-          $ref: '#/components/schemas/Organization'
+        tenant:
+          $ref: '#/components/schemas/Tenant'
         userStore:
           $ref: '#/components/schemas/UserStore'
 
@@ -648,17 +611,17 @@ components:
       properties:
         initiatorType:
           type: string
-          enum: [admin, user]
+          enum: [ADMIN, USER]
         action:
           type: string
-          enum: [update]
+          enum: [UPDATE]
         credentialType:
           type: string
           enum: [password, totp, fido, sms, email]
         user:
           $ref: '#/components/schemas/User'
-        organization:
-          $ref: '#/components/schemas/Organization'
+        tenant:
+          $ref: '#/components/schemas/Tenant'
         userStore:
           $ref: '#/components/schemas/UserStore'
     
@@ -667,14 +630,14 @@ components:
       properties:
         initiatorType:
           type: string
-          enum: [admin, user]
+          enum: [ADMIN, USER]
         action:
           type: string
-          enum: [register, invite]
+          enum: [REGISTER, INVITE]
         user:
           $ref: '#/components/schemas/User'
-        organization:
-          $ref: '#/components/schemas/Organization'
+        tenant:
+          $ref: '#/components/schemas/Tenant'
         userStore:
           $ref: '#/components/schemas/UserStore'
         registrationMethods:
@@ -695,14 +658,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserClaim'
-        roles:
-          type: array
-          items:
-            type: string
-        groups:
-          type: array
-          items:
-            type: string
         ref:
           type: string
           format: uri
@@ -715,20 +670,28 @@ components:
           type: string
         value:
           type: string
-    Organization:
+    Tenant:
       type: object
       properties:
         id:
           type: string
+          example:
+            678
         name:
           type: string
+          example:
+            abcinvestments
     UserStore:
       type: object
       properties:
         id:
           type: string
+          example:
+            REVGQVVMVA==
         name:
           type: string
+          example:
+            DEFAULT
     ProfileUpdatedUser:
       type: object
       properties:
@@ -739,14 +702,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserClaim'
+          example:
+            - uri: "http://wso2.org/claims/dob"
+              value: "1989-09-07"
         updatedClaims:
           type: array
           items:
             $ref: '#/components/schemas/UserClaim'
+          example:
+            - uri: "http://wso2.org/claims/givenname"
+              value: "Pearl"
         removedClaims:
           type: array
           items:
             $ref: '#/components/schemas/UserClaim'
+          example:
+            - uri: "http://wso2.org/claims/country"
+              value: "US"
         ref:
           type: string
           format: uri
