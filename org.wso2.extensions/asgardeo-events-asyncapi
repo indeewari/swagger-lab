@@ -662,7 +662,7 @@ components:
           type: string
           format: uri
           examples:
-            - 'https://api.asg.io/t/indeewari/scim2/4c9af344-3c8e-44c4-895c-831cf71b6b21'
+            - 'https://api.asg.io/t/indeewari/scim2/Users/4c9af344-3c8e-44c4-895c-831cf71b6b21'
     UserClaim:
       type: object
       properties:
@@ -710,8 +710,8 @@ components:
           items:
             $ref: '#/components/schemas/UserClaim'
           example:
-            - uri: "http://wso2.org/claims/givenname"
-              value: "Pearl"
+            - uri: "http://wso2.org/claims/emailAddresses"
+              value: [ "bob@work.example.com","john@wso2.com"]
         removedClaims:
           type: array
           items:
@@ -723,4 +723,4 @@ components:
           type: string
           format: uri
           examples:
-            - 'https://api.asg.io/t/indeewari/scim2/4c9af344-3c8e-44c4-895c-831cf71b6b21'
+            - 'https://api.asg.io/t/indeewari/scim2/Users/4c9af344-3c8e-44c4-895c-831cf71b6b21'
