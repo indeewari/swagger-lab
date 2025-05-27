@@ -584,6 +584,9 @@ components:
           initiatorType:
             type: string
             enum: [ADMIN, USER]
+          action:
+            type: string
+            enum: [UPDATE]
           user:
             $ref: '#/components/schemas/ProfileUpdatedUser'
           tenant:
